@@ -1,3 +1,9 @@
+//High score send
+if (localStorage.getItem("HS") == null) {
+    localStorage.setItem("HS", 0);
+}
+var HS = localStorage.getItem("HS");
+
 //variables
 var game = true;
 var score = 0;
@@ -23,13 +29,16 @@ function drawE(img, x, y, width, height) {
 
 // Create Canvas
 
-var canvas = document.createElement("canvas");
+/*var canvas = document.createElement("canvas");
 ctx = canvas.getContext("2d");
 
 canvas.width = 800;
 canvas.height = 600;
 
-document.body.appendChild(canvas);
+document.body.appendChild(canvas);*/
+
+var canvas = document.getElementById("myCanvas");
+ctx = canvas.getContext("2d");
 
 // Define hero
 
@@ -54,6 +63,8 @@ var bahamutImg = new Image();
 bahamutImg.src = "./assets/bahamut.png";
 var bombSound = new Audio();
 bombSound.src = "./Sounds/Explosion.mp3";
+var walkSound = new Audio();
+walkSound.src = "./Sounds/walk.mp3";
 // Define attack
 
 let attackImg = new Image();
@@ -83,8 +94,8 @@ class Enemy {
     draw() {
         if (this.img == bahamutImg) {
             draw(this.img, this.walkCycle * this.width, 1 * this.height, this.width, this.height, this.x, this.y, this.width, this.height);
-        }else{
-            drawE(this.img,this.x ,this.y ,this.width , this.height);
+        } else {
+            drawE(this.img, this.x, this.y, this.width, this.height);
         }
     }
     update() {
@@ -152,6 +163,10 @@ function collision(fireX, fireY, fireW, fireH, enemyX, enemyY, enemyW, enemyH, g
                 attack.x = canvas.width + 120 / 3 + 4;
 
                 score++;
+                if (score > HS) {
+                    localStorage.setItem("HS" , score);
+                    HS = score;
+                }
 
                 enemy[go].enemy = false;
 
@@ -198,6 +213,9 @@ addEventListener("keyup", function (e) {
     delete keysDown[e.keyCode];
     currentDirection = RIGHT;
     hM = false;
+
+    walkSound.pause();
+    walkSound.currentTime = 0;
 });
 
 // function to move
@@ -206,10 +224,20 @@ function movement() {
     if (38 in keysDown && hero.y - hero.speed > 30) {
         moveChar(0, -1, UP);
         hM = true;
+
+        walkSound.play();
+        if (walkSound.currentTime <= 2.5) {
+            walkSound.currentTime = 0;
+        }
     }
     if (40 in keysDown && hero.y + scaled_height + hero.speed < canvas.height) {
         moveChar(0, 1, DOWN);
         hM = true;
+
+        walkSound.play();
+        if (walkSound.currentTime <= 2.5) {
+            walkSound.currentTime = 0;
+        }
     }
 
     if (!hM) {
@@ -285,7 +313,10 @@ function animate() {
 
 
         // code that should be looped
+        //loadBackground();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         loadBackground();
+
         ctx.beginPath();
         ctx.fillStyle = "red";
         ctx.font = "20px Arial";
@@ -294,6 +325,10 @@ function animate() {
         ctx.beginPath();
         ctx.fillStyle = "red";
         ctx.fillText("Score : " + score, 300, 30);
+
+        ctx.beginPath();
+        ctx.fillStyle = "red";
+        ctx.fillText("High Score : " + localStorage.getItem("HS"), 600, 30);
 
 
 
